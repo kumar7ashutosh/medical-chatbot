@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>AI Medical Chatbot</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:"Segoe UI",sans-serif;
+            background:#0f172a;
+            color:white;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+        }
+
+        .chat-wrapper{
+            width:100%;
+            max-width:900px;
+            height:90vh;
+            background:#111827;
+            border-radius:24px;
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .topbar{
+            padding:22px 28px;
+            background:#1e293b;
+            border-bottom:1px solid rgba(255,255,255,0.08);
+        }
+
+        .topbar h1{
+            font-size:1.4rem;
+            font-weight:700;
+        }
+
+        .topbar p{
+            margin-top:5px;
+            color:#94a3b8;
+            font-size:0.92rem;
+        }
+
+        .chat-box{
+            flex:1;
+            overflow-y:auto;
+            padding:25px;
+            display:flex;
+            flex-direction:column;
+            gap:18px;
+            background:#0f172a;
+
+            scroll-behavior:smooth;
+        }
+
+        .message{
+            max-width:78%;
+            padding:16px 18px;
+            border-radius:18px;
+            line-height:1.6;
+            font-size:0.95rem;
+            word-wrap:break-word;
+            animation:fadeIn 0.2s ease;
+        }
+
+        .user{
+            align-self:flex-end;
+            background:linear-gradient(
+                135deg,
+                #2563eb,
+                #3b82f6
+            );
+            color:white;
+            border-bottom-right-radius:5px;
+        }
+
+        .assistant{
+            align-self:flex-start;
+            background:#1e293b;
+            color:#e2e8f0;
+            border-bottom-left-radius:5px;
+            border:1px solid rgba(255,255,255,0.05);
+        }
+
+        .role{
+            font-size:0.78rem;
+            font-weight:600;
+            margin-bottom:6px;
+            opacity:0.8;
+            text-transform:uppercase;
+            letter-spacing:0.5px;
+        }
+
+        .input-area{
+            padding:20px;
+            background:#111827;
+            border-top:1px solid rgba(255,255,255,0.08);
+        }
+
+        form{
+            width:100%;
+        }
+
+        .input-group{
+            display:flex;
+            gap:14px;
+        }
+
+        textarea{
+            flex:1;
+            resize:none;
+            border:none;
+            outline:none;
+            background:#1e293b;
+            color:white;
+            border-radius:16px;
+            padding:16px;
+            font-size:1rem;
+            height:60px;
+        }
+
+        textarea::placeholder{
+            color:#94a3b8;
+        }
+
+        button{
+            border:none;
+            cursor:pointer;
+            transition:0.2s;
+        }
+
+        .send-btn{
+            background:#2563eb;
+            color:white;
+            padding:0 24px;
+            border-radius:16px;
+            font-size:1rem;
+            font-weight:600;
+        }
+
+        .send-btn:hover{
+            background:#1d4ed8;
+            transform:translateY(-1px);
+        }
+
+        .clear-btn{
+            margin-top:12px;
+            width:100%;
+            padding:12px;
+            border-radius:14px;
+            background:#dc2626;
+            color:white;
+            font-size:0.95rem;
+            font-weight:600;
+        }
+
+        .clear-btn:hover{
+            background:#b91c1c;
+        }
+
+        .error{
+            background:#7f1d1d;
+            color:#fecaca;
+            padding:14px;
+            border-radius:12px;
+            margin-bottom:18px;
+        }
+
+        @keyframes fadeIn{
+
+            from{
+                opacity:0;
+                transform:translateY(10px);
+            }
+
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+
+        ::-webkit-scrollbar{
+            width:6px;
+        }
+
+        ::-webkit-scrollbar-thumb{
+            background:#334155;
+            border-radius:10px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="chat-wrapper">
+
+        <div class="topbar">
+
+            <h1>🩺 AI Medical Chatbot</h1>
+
+            <p>
+                Ask medical questions powered by AI + RAG
+            </p>
+
+        </div>
+
+        <div class="chat-box" id="chat-box">
+
+            {% if error %}
+
+                <div class="error">
+                    {{ error }}
+                </div>
+
+            {% endif %}
+
+            {% for msg in messages %}
+
+                <div class="message {{ msg.role }}">
+
+                    <div class="role">
+                        {{ msg.role }}
+                    </div>
+
+                    <div>
+                        {{ msg.content | safe | nl2br }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+        <div class="input-area">
+
+            <form method="POST" action="{{ url_for('index') }}">
+
+                <div class="input-group">
+
+                    <textarea
+                        name="prompt"
+                        placeholder="Ask a medical question..."
+                        required
+                    ></textarea>
+
+                    <button
+                        type="submit"
+                        class="send-btn"
+                    >
+                        Send
+                    </button>
+
+                </div>
+
+            </form>
+
+            <form method="GET" action="{{ url_for('clear') }}">
+
+                <button
+                    type="submit"
+                    class="clear-btn"
+                >
+                    Clear Chat
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        function scrollToBottom() {
+
+            const chatBox =
+                document.getElementById("chat-box");
+
+            chatBox.scrollTop =
+                chatBox.scrollHeight;
+        }
+
+        window.onload = scrollToBottom;
+
+    </script>
+
+</body>
+
+</html>
